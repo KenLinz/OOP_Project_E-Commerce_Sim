@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Interactive Page 2</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        button { font-size: 1rem; padding: 10px; }
+        #message { margin-top: 15px; font-weight: bold; color: blue; }
+    </style>
+</head>
+<body>
+<h1>Welcome to the Interactive Page 2!</h1>
+
+<p>This is a real HTML file served by Spring Boot and Thymeleaf.</p>
+
+<button id="myButton">Click Me!</button>
+<div id="message"></div>
+
+<script>
+    document.getElementById("myButton").addEventListener("click", function() {
+        document.getElementById("message").innerText = "You clicked the button! This is JavaScript.";
+    });
+</script>
+
+<br/><br/>
+<a th:href="@{/}">Back to Home</a>
+
+</body>
+</html>
