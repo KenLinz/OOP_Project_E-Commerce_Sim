@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Dashboard</title>
+</head>
+<body>
+<h2 th:text="'Welcome to the Dashboard, ' + ${username} + '!'">Welcome to the Dashboard!</h2>
+<p>This is a protected area, only accessible after login.</p>
+
+<p><a th:href="@{/logout}">Log Out</a></p>
+</body>
+</html>
