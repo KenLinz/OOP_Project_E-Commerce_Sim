@@ -34,7 +34,6 @@ models to reference. The attributes of the UserSQL model include:
 The CartSQL model is for tracking each user's cart upon logging in and out. Attributes include:
 * **User_ID -** Foreign key, references UserSQL model's ID
 * **ID -** Long unique identifier
-* **Cart_Item_IDs -** List<Long> of all CartItemSQL model IDs in cart
 
 #### CartItemSQL
 This model is used to handle the many-to-many relationship of carts and products. Attributes include:
