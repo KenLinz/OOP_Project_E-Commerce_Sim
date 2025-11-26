@@ -13,7 +13,8 @@ the **com.commerce.ooad.E_Commerce folder**.
 ### HTML Templates
 The templates can be found in **resources.templates** or **resources.static**. The main HTML files we should worry
 about are **login, dashboard, shop, cart, and checkout**. 
-___ 
+
+
 
 ## SQL
 The SQL database will handle the frontend logic that should be passed to the Java objects for calculation. Models can
@@ -70,7 +71,8 @@ Update, and Delete) methods. Repositories can be found in the **com.commerce.ooa
 The schema.sql file will initialize SQL tables and data.sql will handle initializing entries to these tables. Each
 model will have its own table, with similar attribute types as the models (except in SQL). These can be found in the 
 **resources** folder.
-___
+
+
 
 ## Java Classes (OOAD)
 ### User
