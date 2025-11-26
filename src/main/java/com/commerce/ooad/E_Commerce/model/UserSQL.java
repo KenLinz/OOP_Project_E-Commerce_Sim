@@ -3,7 +3,8 @@ package com.commerce.ooad.E_Commerce.model;
 import jakarta.persistence.*;
 
 @Entity
-public class Users {
+@Table(name = "users")
+public class UserSQL {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

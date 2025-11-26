@@ -1,5 +1,7 @@
 package observer;
 
 public enum EventType {
-    All
+    All,
+    SuccessfulTransaction,
+    FailedTransaction
 }

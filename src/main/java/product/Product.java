@@ -1,4 +1,4 @@
 package product;
 
-public class Product implements IProduct{
+public class Product implements IProduct {
 }

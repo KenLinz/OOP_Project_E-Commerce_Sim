@@ -4,7 +4,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import com.commerce.ooad.E_Commerce.model.Users;
+import com.commerce.ooad.E_Commerce.model.UserSQL;
 import com.commerce.ooad.E_Commerce.repository.UserRepository;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -45,12 +45,12 @@ public class HomeController {
 
     @GetMapping("/register")
     public String showRegistrationForm(Model model) {
-        model.addAttribute("user", new Users());
+        model.addAttribute("user", new UserSQL());
         return "registration-form";
     }
 
     @PostMapping("/register")
-    public String registerUser(Users user) {
+    public String registerUser(UserSQL user) {
         userRepository.save(user);
         return "redirect:/registration-success";
     }
@@ -61,17 +61,23 @@ public class HomeController {
     }
 
     @GetMapping("/login")
-    public String login() {
+    public String login(HttpSession session) {
+        String currentUsername = (String) session.getAttribute("loggedInUser");
+
+        if (currentUsername != null) {
+            return "redirect:/dashboard";
+        }
+
         return "login";
     }
 
     @PostMapping("/login")
     public String processLogin(@RequestParam String username, @RequestParam String password, Model model, HttpSession session) {
 
-        Optional<Users> userOptional = userRepository.findByUsername(username);
+        Optional<UserSQL> userOptional = userRepository.findByUsername(username);
 
         if (userOptional.isPresent()) {
-            Users user = userOptional.get();
+            UserSQL user = userOptional.get();
 
             if (user.getPassword().equals(password)) {
                 session.setAttribute("loggedInUser", user.getUsername());
