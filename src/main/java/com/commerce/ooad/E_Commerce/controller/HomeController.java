@@ -177,6 +177,25 @@ public class HomeController {
         return "payment-methods";
     }
 
+    @GetMapping("/cart")
+    public String showCart(HttpSession session, Model model) {
+        String username = (String) session.getAttribute("username");
+        if (username == null) {
+            return "redirect:/login";
+        }
+
+        UserSQL currentUser = (UserSQL) session.getAttribute("user");
+
+        Optional<CartSQL> optionalCart = cartRepository.findByUser(currentUser);
+
+        CartSQL cart = optionalCart.orElseGet(() -> {
+            return new CartSQL(currentUser);
+        });
+
+        model.addAttribute("cart", cart);
+        return "cart";
+    }
+
     @GetMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate();
