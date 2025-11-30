@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Payment Methods</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f9; }
+        .container { width: 80%; max-width: 800px; margin: 20px auto; padding: 20px; background: white; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); border-radius: 8px; }
+        h1 { color: #333; }
+        .back-link { display: inline-block; margin-bottom: 20px; text-decoration: none; color: #4CAF50; font-weight: bold; }
+        .methods-list { list-style: none; padding: 0; }
+        .method-item {
+            border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 4px;
+            display: flex; justify-content: space-between; align-items: center;
+            background-color: #fff;
+        }
+        .method-info { font-weight: bold; }
+        .management-actions a { color: #007bff; margin-left: 15px; text-decoration: none; }
+        .management-actions button { background: none; border: none; color: red; cursor: pointer; font-size: 1em; }
+        .add-btn {
+            padding: 10px 20px; background-color: #007bff; color: white; border-radius: 5px;
+            text-decoration: none; border: none; cursor: pointer;
+        }
+        .empty-state {
+            padding: 20px;
+            border: 1px dashed #ccc;
+            text-align: center;
+            color: #777;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a th:href="@{/dashboard}" class="back-link">← Back to Dashboard</a>
+    <h1>💳 Your Saved Payment Methods</h1>
+
+    <div th:if="${#lists.isEmpty(paymentMethods)}" class="empty-state">
+        <p>You have no saved payment methods. Use the button below to add one!</p>
+    </div>
+
+    <ul class="methods-list">
+        <li th:each="method : ${paymentMethods}"
+            class="method-item">
+
+            <div class="method-info">
+                <strong th:text="${method.paymentType}">Payment Type</strong>
+
+                <span th:if="${method.paymentType == 'Visa' or method.paymentType == 'MasterCard'}"
+                      class="method-details-block">
+
+        <div class="method-detail">
+            - Name: <span th:text="${method.paymentCardName ?: '[Name not provided]'}">ALICE SMITH</span>
+        </div>
+
+        <div th:if="${method.paymentCardNumber != null and #strings.length(method.paymentCardNumber) >= 4}"
+             class="method-detail">
+            - Card ending in
+            <span th:text="${#strings.substring(method.paymentCardNumber, #strings.length(method.paymentCardNumber) - 4)}">4444</span>
+        </div>
+        <div th:unless="${method.paymentCardNumber != null and #strings.length(method.paymentCardNumber) >= 4}"
+             class="method-detail">
+            [Card number incomplete or not available]
+        </div>
+    </span>
+
+                <span th:if="${method.paymentType == 'Paypal'}" class="method-details-block">
+        <div class="method-detail">
+            - Email:
+            <span th:text="${method.paymentEmail ?: '[Email not available]'}">user@paypal.com</span>
+        </div>
+    </span>
+
+                <div class="method-detail" style="color: #4CAF50; margin-top: 5px;">
+                    Balance:
+                    <span th:text="${#numbers.formatCurrency(method.balance ?: 0.00)}">$XXX.XX</span>
+                </div>
+            </div>
+
+            <div class="management-actions">
+                <a th:href="@{'/payment/edit/' + ${method.id}}">Edit</a>
+                <form th:action="@{/payment/delete}" method="post" style="display: inline;">
+                    <input type="hidden" name="methodId" th:value="${method.id}"/>
+                    <button type="submit">Remove</button>
+                </form>
+            </div>
+        </li>
+    </ul>
+
+    <div style="text-align: center; margin-top: 30px;">
+        <a th:href="@{/payment/add}" class="add-btn">+ Add New Payment Method</a>
+    </div>
+</div>
+</body>
+</html>

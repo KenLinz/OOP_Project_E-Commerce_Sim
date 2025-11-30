@@ -1,6 +1,7 @@
 package com.commerce.ooad.E_Commerce.model;
 
 import jakarta.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -24,6 +25,9 @@ public class UserSQL {
 
     @Column(name = "email")
     private String email;
+
+    @Column(name = "state")
+    private String state;
 
     public Long getId() {
         return id;
@@ -67,5 +71,13 @@ public class UserSQL {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
     }
 }

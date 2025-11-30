@@ -34,6 +34,15 @@
     </div>
 
     <div>
+        <label for="state">State:</label>
+        <select id="state" th:field="*{state}" required>
+            <option value="">-- Select State --</option>
+            <option value="CO">Colorado</option>
+            <option value="CA">California</option>
+        </select>
+    </div>
+
+    <div>
         <button type="submit">Sign Up</button>
     </div>
 </form>

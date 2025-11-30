@@ -4,16 +4,33 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import com.commerce.ooad.E_Commerce.model.UserSQL;
-import com.commerce.ooad.E_Commerce.repository.UserRepository;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PostMapping;
 import jakarta.servlet.http.HttpSession;
+
+import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
+
+import com.commerce.ooad.E_Commerce.model.UserSQL;
+import com.commerce.ooad.E_Commerce.model.ProductSQL;
+import com.commerce.ooad.E_Commerce.model.CartSQL;
+import com.commerce.ooad.E_Commerce.model.CartItemSQL;
+import com.commerce.ooad.E_Commerce.model.PaymentMethodSQL;
+import com.commerce.ooad.E_Commerce.repository.UserRepository;
+import com.commerce.ooad.E_Commerce.repository.ProductRepository;
+import com.commerce.ooad.E_Commerce.repository.CartRepository;
+import com.commerce.ooad.E_Commerce.repository.CartItemRepository;
+import com.commerce.ooad.E_Commerce.repository.PaymentMethodRepository;
 
 @Controller
 public class HomeController {
     private final UserRepository userRepository;
+    private final ProductRepository productRepository;
+    private final CartRepository cartRepository;
+    private final CartItemRepository cartItemRepository;
+    private final PaymentMethodRepository paymentMethodRepository;
 
     @GetMapping("/")
     public String index() {
@@ -33,14 +50,17 @@ public class HomeController {
         return "This is Page 1";
     }
 
-    // This method expects src/main/resources/templates/page2.html
     @GetMapping("/2")
     public String page2() {
         return "page2";
     }
 
-    public HomeController(UserRepository userRepository) {
+    public HomeController(UserRepository userRepository, ProductRepository productRepository, CartRepository cartRepository, CartItemRepository cartItemRepository, PaymentMethodRepository paymentMethodRepository) {
         this.userRepository = userRepository;
+        this.productRepository = productRepository;
+        this.cartRepository = cartRepository;
+        this.cartItemRepository = cartItemRepository;
+        this.paymentMethodRepository = paymentMethodRepository;
     }
 
     @GetMapping("/register")
@@ -62,7 +82,7 @@ public class HomeController {
 
     @GetMapping("/login")
     public String login(HttpSession session) {
-        String currentUsername = (String) session.getAttribute("loggedInUser");
+        String currentUsername = (String) session.getAttribute("username");
 
         if (currentUsername != null) {
             return "redirect:/dashboard";
@@ -80,7 +100,8 @@ public class HomeController {
             UserSQL user = userOptional.get();
 
             if (user.getPassword().equals(password)) {
-                session.setAttribute("loggedInUser", user.getUsername());
+                session.setAttribute("user", user);
+                session.setAttribute("username", user.getUsername());
                 return "redirect:/dashboard";
             }
         }
@@ -91,7 +112,7 @@ public class HomeController {
 
     @GetMapping("/dashboard")
     public String dashboard(HttpSession session, Model model) {
-        String username = (String) session.getAttribute("loggedInUser");
+        String username = (String) session.getAttribute("username");
 
         if (username == null) {
             return "redirect:/login";
@@ -101,10 +122,38 @@ public class HomeController {
         return "dashboard";
     }
 
+    @GetMapping("/shop")
+    public String viewShop(HttpSession session, Model model) {
+        String username = (String) session.getAttribute("username");
+        if (username == null) {
+            return "redirect:/login";
+        }
+
+        List<ProductSQL> allProducts = productRepository.findAll();
+
+        model.addAttribute("products", allProducts);
+
+        return "shop";
+    }
+
+    @GetMapping("/payment-methods")
+    public String viewPaymentMethods(HttpSession session, Model model) {
+        String username = (String) session.getAttribute("username");
+        if (username == null) {
+            return "redirect:/login";
+        }
+
+        UserSQL currentUser = (UserSQL) session.getAttribute("user");
+        List<PaymentMethodSQL> paymentMethods = paymentMethodRepository.findByUser(currentUser);
+
+        model.addAttribute("paymentMethods", paymentMethods);
+
+        return "payment-methods";
+    }
+
     @GetMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate();
-
         return "redirect:/login";
     }
 }
