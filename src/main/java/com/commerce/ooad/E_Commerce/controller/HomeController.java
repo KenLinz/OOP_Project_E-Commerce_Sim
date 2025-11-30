@@ -70,7 +70,33 @@ public class HomeController {
     }
 
     @PostMapping("/register")
-    public String registerUser(UserSQL user) {
+    public String registerUser(UserSQL user, Model model) {
+        if (user.getState() == null || user.getState().isEmpty()) {
+            model.addAttribute("stateError", "Please select your state.");
+        }
+        if (user.getPassword() == null || user.getPassword().isEmpty()) {
+            model.addAttribute("passwordError", "Password cannot be empty.");
+        }
+        if (user.getEmail() == null || user.getEmail().isEmpty()) {
+            model.addAttribute("emailError", "Email cannot be empty.");
+        } else if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+            model.addAttribute("emailError", "Email already exists. Please choose another.");
+        }
+        if (user.getUsername() == null || user.getUsername().isEmpty()) {
+            model.addAttribute("usernameError", "Username cannot be empty.");
+        } else if (userRepository.findByUsername(user.getUsername()).isPresent()) {
+            model.addAttribute("usernameError", "Username already exists. Please choose another.");
+        }
+
+        if (model.containsAttribute("stateError") ||
+                model.containsAttribute("passwordError") ||
+                model.containsAttribute("emailError") ||
+                model.containsAttribute("usernameError")) {
+
+            model.addAttribute("user", user);
+            return "registration-form";
+        }
+
         userRepository.save(user);
         return "redirect:/registration-success";
     }

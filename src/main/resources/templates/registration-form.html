@@ -8,29 +8,23 @@
 <h2>New Account Registration</h2>
 
 <form th:action="@{/register}" th:object="${user}" method="post">
+
     <div>
         <label for="username">Username:</label>
         <input type="text" id="username" th:field="*{username}" required>
+        <span th:if="${usernameError}" th:text="${usernameError}" style="color: red;"></span>
     </div>
 
     <div>
         <label for="password">Password:</label>
         <input type="password" id="password" th:field="*{password}" required>
-    </div>
-
-    <div>
-        <label for="firstName">First Name:</label>
-        <input type="text" id="firstName" th:field="*{firstName}" required>
-    </div>
-
-    <div>
-        <label for="lastName">Last Name:</label>
-        <input type="text" id="lastName" th:field="*{lastName}" required>
+        <span th:if="${passwordError}" th:text="${passwordError}" style="color: red;"></span>
     </div>
 
     <div>
         <label for="email">Email:</label>
         <input type="email" id="email" th:field="*{email}" required>
+        <span th:if="${emailError}" th:text="${emailError}" style="color: red;"></span>
     </div>
 
     <div>
@@ -40,6 +34,7 @@
             <option value="CO">Colorado</option>
             <option value="CA">California</option>
         </select>
+        <span th:if="${stateError}" th:text="${stateError}" style="color: red;"></span>
     </div>
 
     <div>

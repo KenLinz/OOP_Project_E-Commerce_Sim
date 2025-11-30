@@ -17,12 +17,6 @@ public class UserSQL {
     @Column(name = "password")
     private String password;
 
-    @Column(name = "firstname")
-    private String firstname;
-
-    @Column(name = "lastname")
-    private String lastname;
-
     @Column(name = "email")
     private String email;
 
@@ -47,22 +41,6 @@ public class UserSQL {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public String getFirstName() {
-        return firstname;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstname = firstName;
-    }
-
-    public String getLastName() {
-        return lastname;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastname = lastName;
     }
 
     public String getEmail() {
