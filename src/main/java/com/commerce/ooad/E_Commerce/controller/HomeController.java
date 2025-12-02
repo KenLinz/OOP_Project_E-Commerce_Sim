@@ -234,6 +234,59 @@ public class HomeController {
         return "redirect:/shop";
     }
 
+    @PostMapping("/payment/add")
+    public String addPaymentMethod(@RequestParam String paymentType,
+                                @RequestParam BigDecimal balance,
+                                @RequestParam(required = false) String paymentEmail,
+                                @RequestParam(required = false) String paymentPassword,
+                                @RequestParam(required = false) String paymentCardNumber,
+                                @RequestParam(required = false) String paymentCardPin,
+                                @RequestParam(required = false) String paymentCardName,
+                                HttpSession session,
+                                Model model) {
+        String username = (String) session.getAttribute("username");
+        if (username == null) {
+            return "redirect:/login";
+        }
+
+        UserSQL currentUser = (UserSQL) session.getAttribute("user");
+
+        PaymentMethodSQL newPaymentMethod = new PaymentMethodSQL(
+            currentUser,
+            paymentType,
+            balance,
+            paymentEmail,
+            paymentPassword,
+            paymentCardNumber,
+            paymentCardPin,
+            paymentCardName
+        );
+
+        paymentMethodRepository.save(newPaymentMethod);
+
+        return "redirect:/payment-methods";
+    }
+    @PostMapping("/payment/delete")
+    public String deletePaymentMethod(@RequestParam Long methodId, HttpSession session) {
+        String username = (String) session.getAttribute("username");
+        if (username == null) {
+            return "redirect:/login";
+        }
+
+        UserSQL currentUser = (UserSQL) session.getAttribute("user");
+
+        Optional<PaymentMethodSQL> paymentMethodOptional = paymentMethodRepository.findById(methodId);
+        
+        if (paymentMethodOptional.isPresent()) {
+            PaymentMethodSQL paymentMethod = paymentMethodOptional.get();
+
+            if (paymentMethod.getUser().getId().equals(currentUser.getId())) {
+                paymentMethodRepository.delete(paymentMethod);
+            }
+        }
+
+        return "redirect:/payment-methods";
+    }
 
     @GetMapping("/logout")
     public String logout(HttpSession session) {
