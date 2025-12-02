@@ -4,6 +4,11 @@ public class PaypalStrategy extends PaymentStrategy {
     private String email;
     private String password;
     private float balance;
+    public PaypalStrategy(String email, String password, float balance) {
+        this.email = email;
+        this.password = password;
+        this.balance = balance;
+    }
     @Override
     public boolean validate() {
         if(email == null || !email.contains("@")) {

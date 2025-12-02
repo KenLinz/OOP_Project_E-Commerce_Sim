@@ -5,7 +5,7 @@ public class VisaStrategy extends PaymentStrategy {
     private String cardPin;
     private String cardName;
     private float balance;
-    public VisaStrategy(String cardNumber, String cardPin, string cardName, float balance){
+    public VisaStrategy(String cardNumber, String cardPin, String cardName, float balance){
         this.cardNumber = cardNumber;
         this.cardPin = cardPin;
         this.cardName = cardName;
