@@ -195,6 +195,45 @@ public class HomeController {
         model.addAttribute("cart", cart);
         return "cart";
     }
+    @PostMapping("/add-to-cart")
+    public String addToCart(@RequestParam Long productId,
+                           @RequestParam Integer quantity,
+                           HttpSession session,
+                           Model model) {
+        String username = (String) session.getAttribute("username");
+        if (username == null) {
+            return "redirect:/login";
+        }
+        UserSQL currentUser = (UserSQL) session.getAttribute("user");
+        Optional<CartSQL> userCart = cartRepository.findByUser(currentUser);
+        CartSQL cart; 
+        if(userCart.isPresent()){
+            cart = userCart.get();
+        }
+        else {
+                CartSQL newCart = new CartSQL(currentUser);
+                cart = cartRepository.save(newCart);
+        }
+        Optional<ProductSQL> currProduct = productRepository.findById(productId);
+        if (!currProduct.isPresent()) {
+            model.addAttribute("error", "Product does not exist");
+            return "redirect:/shop";
+        }
+        ProductSQL product = currProduct.get();
+        Optional<CartItemSQL> itemInCart = cartItemRepository.findByCartIdAndProductId(cart.getId(), productId);
+        if(itemInCart.isPresent()) {
+            CartItemSQL existingItem = itemInCart.get();
+            existingItem.setQuantity(existingItem.getQuantity() + quantity);
+            cartItemRepository.save(existingItem);
+        }
+        else{
+            CartItemSQL newItem = new CartItemSQL(cart, product, quantity);
+            cartItemRepository.save(newItem);
+        }
+
+        return "redirect:/shop";
+    }
+
 
     @GetMapping("/logout")
     public String logout(HttpSession session) {
