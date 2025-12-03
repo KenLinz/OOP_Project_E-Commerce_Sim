@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirm Your Order</title>
+    <link rel="stylesheet" th:href="@{/style.css}" href="../static/style.css"></head>
+</head>
+<body>
+
+<header>
+    <h1>Confirm Checkout</h1>
+</header>
+
+<div class="container">
+    <a th:href="@{/checkout}" class="back-link">← Back to Customize</a>
+
+    <div class="content">
+        <div th:if="${error}" class="error" th:text="${error}"></div>
+
+        <div class="section">
+            <div class="section-title">Order Items</div>
+            <div th:each="item : ${checkoutResult.orderItems}" class="order-item">
+                <div class="item-description">
+                    <span class="item-name" th:text="${item.description}">Product Name</span>
+                </div>
+                <div class="item-price">
+                    $<span th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 2, 'POINT')}">0.00</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Order Summary</div>
+            <div class="summary-box">
+                <div class="summary-row subtotal">
+                    <span>Subtotal:</span>
+                    <span>$<span th:text="${#numbers.formatDecimal(checkoutResult.subtotal, 0, 'COMMA', 2, 'POINT')}">0.00</span></span>
+                </div>
+                <div class="summary-row tax">
+                    <span>
+                        Tax
+                        <span class="state-badge" th:text="${checkoutResult.state}">State</span>
+                        <span class="tax-info" th:text="'(' + ${#numbers.formatDecimal(checkoutResult.taxRate, 0, 2)} + '%)'"></span>
+                    </span>
+                    <span>$<span th:text="${#numbers.formatDecimal(checkoutResult.taxAmount, 0, 'COMMA', 2, 'POINT')}">0.00</span></span>
+                </div>
+                <div class="summary-row shipping">
+                    <span>Shipping:</span>
+                    <span th:if="${checkoutResult.shippingCost.compareTo(T(java.math.BigDecimal).ZERO) == 0}">
+                        <span style="color: #28a745; font-weight: 600;">FREE</span>
+                    </span>
+                    <span th:unless="${checkoutResult.shippingCost.compareTo(T(java.math.BigDecimal).ZERO) == 0}">
+                        $<span th:text="${#numbers.formatDecimal(checkoutResult.shippingCost, 0, 'COMMA', 2, 'POINT')}">0.00</span>
+                    </span>
+                </div>
+                <div class="summary-row total">
+                    <span>Total:</span>
+                    <span>$<span th:text="${#numbers.formatDecimal(checkoutResult.total, 0, 'COMMA', 2, 'POINT')}">0.00</span></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Select Payment Method</div>
+
+            <div th:if="${paymentMethods != null and not #lists.isEmpty(paymentMethods)}">
+                <form th:action="@{/checkout/complete}" method="post" id="checkoutForm">
+                    <div class="payment-methods">
+                        <label th:each="method : ${paymentMethods}" class="payment-option">
+                            <div class="payment-details">
+                                <input type="radio" name="paymentMethodId" th:value="${method.id}" required>
+
+                                <span class="payment-icon" th:if="${method.paymentType == 'Paypal'}">Paypal</span>
+                                <span class="payment-icon" th:if="${method.paymentType == 'Visa'}">Visa</span>
+                                <span class="payment-icon" th:if="${method.paymentType == 'MasterCard'}"></span>
+
+                                <div class="payment-info">
+                                    <span class="payment-type" th:text="${method.paymentType}">Payment Type</span>
+                                    <span class="payment-account" th:if="${method.paymentEmail != null}"
+                                          th:text="${method.paymentEmail}"></span>
+                                    <span class="payment-account" th:if="${method.paymentCardNumber != null}"
+                                          th:text="${method.paymentCardName} + ' ending in ' + ${#strings.substring(method.paymentCardNumber, method.paymentCardNumber.length() - 4)}"></span>
+                                </div>
+
+                                <div class="payment-balance">
+                                    Balance: $<span th:text="${#numbers.formatDecimal(method.balance, 0, 'COMMA', 2, 'POINT')}">0.00</span>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="actions">
+                        <a th:href="@{/checkout}" class="btn btn-secondary">← Back</a>
+                        <button type="submit" class="btn btn-primary">Complete Purchase</button>
+                    </div>
+                </form>
+            </div>
+
+            <div th:if="${paymentMethods == null or #lists.isEmpty(paymentMethods)}" class="no-payment">
+                <p style="margin-bottom: 15px;">You don't have any payment methods set up yet.</p>
+                <a th:href="@{/payment/add}" class="btn btn-primary">Add Payment Method</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.payment-option').forEach(option => {
+        option.addEventListener('click', function() {
+            document.querySelectorAll('.payment-option').forEach(opt => { opt.classList.remove('selected'); });
+            this.classList.add('selected');
+            this.querySelector('input[type="radio"]').checked = true;
+        });
+    });
+</script>
+
+</body>
+</html>

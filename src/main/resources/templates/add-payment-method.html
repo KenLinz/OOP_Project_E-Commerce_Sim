@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Payment Method</title>
+    <link rel="stylesheet" th:href="@{/style.css}" href="../static/style.css"></head>
+</head>
+<body>
+
+<header>
+    <h1>Add Payment Methods</h1>
+</header>
+
+<div class="container">
+    <a th:href="@{/payment-methods}" class="back-link">← Back to Payment Methods</a>
+
+    <div th:if="${error}" class="error" th:text="${error}"></div>
+
+    <form th:action="@{/payment/add}" method="post">
+        <div class="form-group">
+            <label for="paymentType">Payment Type <span class="required">*</span></label>
+            <select id="paymentType" name="paymentType" required onchange="showPaymentFields()">
+                <option value="">-- Select Payment Type --</option>
+                <option value="Visa">Visa</option>
+                <option value="MasterCard">MasterCard</option>
+                <option value="Paypal">PayPal</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="balance">Balance <span class="required">*</span></label>
+            <input type="number" id="balance" name="balance" step="0.01" min="0" required placeholder="0.00">
+        </div>
+
+        <!-- PayPal Fields -->
+        <div id="paypalFields" class="payment-type-fields">
+            <h3>PayPal Details</h3>
+            <div class="form-group">
+                <label for="paypalEmail">PayPal Email <span class="required">*</span></label>
+                <input type="email" id="paypalEmail" name="paymentEmail" placeholder="your-email@example.com">
+            </div>
+            <div class="form-group">
+                <label for="paypalPassword">PayPal Password <span class="required">*</span></label>
+                <input type="password" id="paypalPassword" name="paymentPassword" placeholder="Enter your PayPal password">
+            </div>
+        </div>
+
+        <!-- Card Fields (Visa/MasterCard) -->
+        <div id="cardFields" class="payment-type-fields">
+            <h3>Card Details</h3>
+            <div class="form-group">
+                <label for="cardName">Cardholder Name <span class="required">*</span></label>
+                <input type="text" id="cardName" name="paymentCardName" placeholder="John Doe">
+            </div>
+            <div class="form-group">
+                <label for="cardNumber">Card Number (16 digits) <span class="required">*</span></label>
+                <input type="text" id="cardNumber" name="paymentCardNumber" placeholder="1234567890123456" maxlength="16" pattern="\d{16}">
+            </div>
+            <div class="form-group">
+                <label for="cardPin">Card PIN (4 digits) <span class="required">*</span></label>
+                <input type="password" id="cardPin" name="paymentCardPin" placeholder="Enter 4-digit PIN" maxlength="4" pattern="\d{4}">
+            </div>
+        </div>
+
+        <button type="submit">Add Payment Method</button>
+    </form>
+</div>
+
+<script>
+    function showPaymentFields() {
+        const paymentType = document.getElementById('paymentType').value;
+        const paypalFields = document.getElementById('paypalFields');
+        const cardFields = document.getElementById('cardFields');
+
+        // Hide all fields first
+        paypalFields.classList.remove('active');
+        cardFields.classList.remove('active');
+
+        // Show relevant fields based on payment type
+        if (paymentType === 'Paypal') {
+            paypalFields.classList.add('active');
+        } else if (paymentType === 'Visa' || paymentType === 'MasterCard') {
+            cardFields.classList.add('active');
+        }
+    }
+</script>
+
+</body>
+</html>

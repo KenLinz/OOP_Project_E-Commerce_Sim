@@ -17,7 +17,7 @@ INSERT INTO cart_items (cart_id, product_id, quantity)
 VALUES (1, 3, 1);
 
 INSERT INTO payment_methods (user_id, payment_type, balance, payment_card_number, payment_card_pin, payment_card_name)
-VALUES (1, 'Visa', 750.00, '1234123412341234', '1234', 'ADMIN ADMIN');
+VALUES (1, 'Visa', 1000.00, '1234123412341234', '1234', 'ADMIN ADMIN');
 
 INSERT INTO payment_methods (user_id, payment_type, balance, payment_email, payment_password)
 VALUES (1, 'Paypal', 200.50, 'admin.paypal@example.com', '123');

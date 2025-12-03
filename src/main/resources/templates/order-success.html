@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Successful</title>
+    <link rel="stylesheet" th:href="@{/style.css}" href="../static/style.css"></head>
+</head>
+<body>
+<header>
+    <h1>Order Successful!</h1>
+    <p>Thank you for your purchase</p>
+</header>
+
+<div class="container">
+    <div class="content">
+        <div th:if="${orderTotal}" class="order-total">
+            <div class="total-label">Total Amount Paid</div>
+            <div class="total-amount">
+                $<span th:text="${#numbers.formatDecimal(orderTotal, 0, 'COMMA', 2, 'POINT')}">0.00</span>
+            </div>
+        </div>
+
+        <div class="message">
+            Your order has been processed successfully and payment has been confirmed. You will receive an email confirmation shortly with your order details.
+        </div>
+
+        <div class="info-box">
+            <div class="info-box-text">
+                • A confirmation email has been sent to your registered email address<br>
+                • You can track your order status from the email.
+            </div>
+        </div>
+
+        <div class="actions">
+            <a th:href="@{/shop}" class="btn btn-primary">Continue Shopping</a>
+            <a th:href="@{/dashboard}" class="btn btn-secondary">Go to Dashboard</a>
+        </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

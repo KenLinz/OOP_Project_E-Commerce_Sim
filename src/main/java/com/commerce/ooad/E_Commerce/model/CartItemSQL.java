@@ -1,6 +1,7 @@
 package com.commerce.ooad.E_Commerce.model;
 
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "cart_items")
@@ -21,13 +22,47 @@ public class CartItemSQL {
     @JoinColumn(name = "product_id", nullable = false)
     private ProductSQL product;
 
-
     public CartItemSQL() {}
 
     public CartItemSQL(CartSQL cart, ProductSQL product, Integer quantity) {
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("Quantity must be positive");
+        }
         this.cart = cart;
         this.product = product;
         this.quantity = quantity;
+    }
+
+    public void increaseQuantity(Integer amount) {
+        if (amount <= 0) {
+            throw new IllegalArgumentException("Amount must be positive");
+        }
+        this.quantity += amount;
+    }
+
+    public void decreaseQuantity(Integer amount) {
+        if (amount <= 0) {
+            throw new IllegalArgumentException("Amount must be positive");
+        }
+        if (this.quantity - amount < 0) {
+            throw new IllegalArgumentException("Cannot decrease below zero");
+        }
+        this.quantity -= amount;
+    }
+
+    public void updateQuantity(Integer newQuantity) {
+        if (newQuantity <= 0) {
+            throw new IllegalArgumentException("Quantity must be positive");
+        }
+        this.quantity = newQuantity;
+    }
+
+    public BigDecimal getSubtotal() {
+        return product.getCost().multiply(BigDecimal.valueOf(quantity));
+    }
+
+    public boolean belongsToProduct(ProductSQL product) {
+        return this.product.getId().equals(product.getId());
     }
 
     public Long getId() {
@@ -38,23 +73,11 @@ public class CartItemSQL {
         return quantity;
     }
 
-    public void setQuantity(Integer quantity) {
-        this.quantity = quantity;
-    }
-
     public CartSQL getCart() {
         return cart;
     }
 
-    public void setCart(CartSQL cart) {
-        this.cart = cart;
-    }
-
     public ProductSQL getProduct() {
         return product;
-    }
-
-    public void setProduct(ProductSQL product) {
-        this.product = product;
     }
 }

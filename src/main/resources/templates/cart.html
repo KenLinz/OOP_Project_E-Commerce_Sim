@@ -4,27 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Your Shopping Cart</title>
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 0; padding: 20px; }
-        .container { max-width: 800px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        h2 { border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px; color: #333; }
-        .back-link { display: inline-block; margin-bottom: 20px; text-decoration: none; color: #007bff; font-weight: bold; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-        th { background-color: #f8f9fa; color: #555; }
-        .total-row td { font-weight: bold; background-color: #fff3cd; font-size: 1.1em; }
-        .empty-cart { text-align: center; padding: 20px; color: #777; }
-        .actions { text-align: right; margin-top: 20px; }
-        .btn { display: inline-block; padding: 10px 20px; color: white; text-decoration: none; border-radius: 5px; font-size: 16px; border: none; cursor: pointer; }
-        .btn-checkout { background-color: #28a745; }
-        .btn-checkout:hover { background-color: #218838; }
-    </style>
+    <link rel="stylesheet" th:href="@{/style.css}" href="../static/style.css"></head>
 </head>
 <body>
 
+<header>
+    <h1>Your Cart</h1>
+</header>
+
 <div class="container">
     <a th:href="@{/dashboard}" class="back-link">← Back to Dashboard</a>
-    <h2>Your Shopping Cart</h2>
 
     <div th:if="${cart != null and not #lists.isEmpty(cart.items)}">
         <table>
@@ -51,7 +40,6 @@
                 </td>
             </tr>
             </tbody>
-            <tfoot>
             <tr class="total-row">
                 <td colspan="3" style="text-align: right;">Grand Total:</td>
 
@@ -59,11 +47,10 @@
                     $0.00
                 </td>
             </tr>
-            </tfoot>
         </table>
 
         <div class="actions">
-            <a href="#" class="btn btn-checkout">Proceed to Checkout</a>
+            <a th:href="@{/checkout}" class="btn btn-checkout">Proceed to Checkout</a>
         </div>
     </div>
 
