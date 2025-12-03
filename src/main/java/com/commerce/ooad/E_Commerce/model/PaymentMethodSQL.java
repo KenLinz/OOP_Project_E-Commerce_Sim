@@ -2,6 +2,9 @@ package com.commerce.ooad.E_Commerce.model;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
+import paymentStrategy.PaymentStrategy;
+import paymentStrategy.VisaStrategy;
+import paymentStrategy.PaypalStrategy;
 
 @Entity
 @Table(name = "payment_methods")
@@ -115,5 +118,23 @@ public class PaymentMethodSQL {
 
     public void setUser(UserSQL user) {
         this.user = user;
+    }
+
+    public PaymentStrategy toPaymentStrategy() {
+        float balanceFloat = this.balance.floatValue();
+
+        switch (this.paymentType) {
+            case "Paypal":
+                return new PaypalStrategy(this.paymentEmail, this.paymentPassword, balanceFloat);
+            case "Visa":
+            case "MasterCard":
+                return new VisaStrategy(this.paymentCardNumber, this.paymentCardPin, this.paymentCardName, balanceFloat);
+            default:
+                throw new IllegalArgumentException("Unknown payment type: " + this.paymentType);
+        }
+    }
+
+    public void updateBalanceFromStrategy(PaymentStrategy strategy) {
+        this.balance = BigDecimal.valueOf(strategy.getBalance());//had to do bigDecimal because I used float instead -nathan
     }
 }

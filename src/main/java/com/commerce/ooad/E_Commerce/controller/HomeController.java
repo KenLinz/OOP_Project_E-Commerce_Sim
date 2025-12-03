@@ -23,6 +23,7 @@ import com.commerce.ooad.E_Commerce.repository.ProductRepository;
 import com.commerce.ooad.E_Commerce.repository.CartRepository;
 import com.commerce.ooad.E_Commerce.repository.CartItemRepository;
 import com.commerce.ooad.E_Commerce.repository.PaymentMethodRepository;
+import paymentStrategy.PaymentStrategy;
 
 @Controller
 public class HomeController {
@@ -234,6 +235,15 @@ public class HomeController {
         return "redirect:/shop";
     }
 
+    @GetMapping("/payment/add")
+    public String showAddPaymentMethodForm(HttpSession session, Model model) {
+        String username = (String) session.getAttribute("username");
+        if (username == null) {
+            return "redirect:/login";
+        }
+        return "add-payment-method";
+    }
+
     @PostMapping("/payment/add")
     public String addPaymentMethod(@RequestParam String paymentType,
                                 @RequestParam BigDecimal balance,
@@ -261,6 +271,17 @@ public class HomeController {
             paymentCardPin,
             paymentCardName
         );
+
+        try {
+            PaymentStrategy strategy = newPaymentMethod.toPaymentStrategy();
+            if (!strategy.validate()) {
+                model.addAttribute("error", "Invalid payment details. Please check your information again");
+                return "add-payment-method";
+            }
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("error", e.getMessage());
+            return "add-payment-method";
+        }
 
         paymentMethodRepository.save(newPaymentMethod);
 
