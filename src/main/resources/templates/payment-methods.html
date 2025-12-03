@@ -4,38 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Payment Methods</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f9; }
-        .container { width: 80%; max-width: 800px; margin: 20px auto; padding: 20px; background: white; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); border-radius: 8px; }
-        h1 { color: #333; }
-        .back-link { display: inline-block; margin-bottom: 20px; text-decoration: none; color: #4CAF50; font-weight: bold; }
-        .methods-list { list-style: none; padding: 0; }
-        .method-item {
-            border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 4px;
-            display: flex; justify-content: space-between; align-items: center;
-            background-color: #fff;
-        }
-        .method-info { font-weight: bold; }
-        .management-actions a { color: #007bff; margin-left: 15px; text-decoration: none; }
-        .management-actions button { background: none; border: none; color: red; cursor: pointer; font-size: 1em; }
-        .add-btn {
-            padding: 10px 20px; background-color: #007bff; color: white; border-radius: 5px;
-            text-decoration: none; border: none; cursor: pointer;
-        }
-        .empty-state {
-            padding: 20px;
-            border: 1px dashed #ccc;
-            text-align: center;
-            color: #777;
-            margin-top: 20px;
-        }
-    </style>
+    <link rel="stylesheet" th:href="@{/style.css}" href="../static/style.css"></head>
 </head>
 <body>
 
+<header>
+    <h1>Your Payment Methods</h1>
+</header>
+
 <div class="container">
     <a th:href="@{/dashboard}" class="back-link">← Back to Dashboard</a>
-    <h1>💳 Your Saved Payment Methods</h1>
+    <span th:if="${paymentMethodExists}" th:text="${paymentMethodExists}" style="color: red;"></span>
 
     <div th:if="${#lists.isEmpty(paymentMethods)}" class="empty-state">
         <p>You have no saved payment methods. Use the button below to add one!</p>
@@ -80,7 +59,6 @@
             </div>
 
             <div class="management-actions">
-                <a th:href="@{'/payment/edit/' + ${method.id}}">Edit</a>
                 <form th:action="@{/payment/delete}" method="post" style="display: inline;">
                     <input type="hidden" name="methodId" th:value="${method.id}"/>
                     <button type="submit">Remove</button>

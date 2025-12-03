@@ -2,10 +2,13 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>User Registration</title>
+    <link rel="stylesheet" th:href="@{/style.css}" href="../static/style.css"></head>
 </head>
 <body>
 
-<h2>New Account Registration</h2>
+<header>
+    <h1>Register</h1>
+</header>
 
 <form th:action="@{/register}" th:object="${user}" method="post">
 

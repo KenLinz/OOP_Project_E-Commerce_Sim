@@ -27,6 +27,10 @@ public class ProductSQL {
         this.cost = cost;
     }
 
+    public boolean isAvailable() {
+        return cost.compareTo(BigDecimal.ZERO) > 0;
+    }
+
     public Long getId() {
         return id;
     }
@@ -35,23 +39,14 @@ public class ProductSQL {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public BigDecimal getCost() {
         return cost;
     }
 
-    public void setCost(BigDecimal cost) {
-        this.cost = cost;
-    }
-
-    public java.util.List<CartItemSQL> getCartItems() {
-        return cartItems;
-    }
-
-    public void setCartItems(java.util.List<CartItemSQL> cartItems) {
-        this.cartItems = cartItems;
+    public void updatePrice(BigDecimal newCost) {
+        if (newCost.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Cost cannot be negative");
+        }
+        this.cost = newCost;
     }
 }

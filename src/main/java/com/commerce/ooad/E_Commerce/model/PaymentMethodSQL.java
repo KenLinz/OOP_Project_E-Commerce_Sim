@@ -41,7 +41,10 @@ public class PaymentMethodSQL {
 
     public PaymentMethodSQL() {}
 
-    public PaymentMethodSQL(UserSQL user, String paymentType, BigDecimal balance, String paymentEmail, String paymentPassword, String paymentCardNumber, String paymentCardPin, String paymentCardName) {
+    public PaymentMethodSQL(UserSQL user, String paymentType, BigDecimal balance,
+                            String paymentEmail, String paymentPassword,
+                            String paymentCardNumber, String paymentCardPin,
+                            String paymentCardName) {
         this.user = user;
         this.paymentType = paymentType;
         this.balance = balance;
@@ -50,6 +53,47 @@ public class PaymentMethodSQL {
         this.paymentCardNumber = paymentCardNumber;
         this.paymentCardPin = paymentCardPin;
         this.paymentCardName = paymentCardName;
+    }
+
+    public boolean hasType(String type) {
+        return this.paymentType.equals(type);
+    }
+
+    public boolean hasSufficientBalance(BigDecimal amount) {
+        return balance.compareTo(amount) >= 0;
+    }
+
+    public void deductBalance(BigDecimal amount) {
+        if (!hasSufficientBalance(amount)) {
+            throw new IllegalStateException("Insufficient balance");
+        }
+        this.balance = this.balance.subtract(amount);
+    }
+
+    public void addBalance(BigDecimal amount) {
+        this.balance = this.balance.add(amount);
+    }
+
+    public boolean belongsToUser(UserSQL user) {
+        return this.user.getId().equals(user.getId());
+    }
+
+    public PaymentStrategy toPaymentStrategy() {
+        float balanceFloat = this.balance.floatValue();
+        switch (this.paymentType) {
+            case "Paypal":
+                return new PaypalStrategy(this.paymentEmail, this.paymentPassword, balanceFloat);
+            case "Visa":
+            case "MasterCard":
+                return new VisaStrategy(this.paymentCardNumber, this.paymentCardPin,
+                        this.paymentCardName, balanceFloat);
+            default:
+                throw new IllegalArgumentException("Unknown payment type: " + this.paymentType);
+        }
+    }
+
+    public void updateBalanceFromStrategy(PaymentStrategy strategy) {
+        this.balance = BigDecimal.valueOf(strategy.getBalance());
     }
 
     public Long getId() {
@@ -60,81 +104,23 @@ public class PaymentMethodSQL {
         return paymentType;
     }
 
-    public void setPaymentType(String paymentType) {
-        this.paymentType = paymentType;
-    }
-
     public BigDecimal getBalance() {
         return balance;
-    }
-
-    public void setBalance(BigDecimal balance) {
-        this.balance = balance;
     }
 
     public String getPaymentEmail() {
         return paymentEmail;
     }
 
-    public void setPaymentEmail(String paymentEmail) {
-        this.paymentEmail = paymentEmail;
-    }
-
-    public String getPaymentPassword() {
-        return paymentPassword;
-    }
-
-    public void setPaymentPassword(String paymentPassword) {
-        this.paymentPassword = paymentPassword;
-    }
-
     public String getPaymentCardNumber() {
         return paymentCardNumber;
-    }
-
-    public void setPaymentCardNumber(String paymentCardNumber) {
-        this.paymentCardNumber = paymentCardNumber;
-    }
-
-    public String getPaymentCardPin() {
-        return paymentCardPin;
-    }
-
-    public void setPaymentCardPin(String paymentCardPin) {
-        this.paymentCardPin = paymentCardPin;
     }
 
     public String getPaymentCardName() {
         return paymentCardName;
     }
 
-    public void setPaymentCardName(String paymentCardName) {
-        this.paymentCardName = paymentCardName;
-    }
-
     public UserSQL getUser() {
         return user;
-    }
-
-    public void setUser(UserSQL user) {
-        this.user = user;
-    }
-
-    public PaymentStrategy toPaymentStrategy() {
-        float balanceFloat = this.balance.floatValue();
-
-        switch (this.paymentType) {
-            case "Paypal":
-                return new PaypalStrategy(this.paymentEmail, this.paymentPassword, balanceFloat);
-            case "Visa":
-            case "MasterCard":
-                return new VisaStrategy(this.paymentCardNumber, this.paymentCardPin, this.paymentCardName, balanceFloat);
-            default:
-                throw new IllegalArgumentException("Unknown payment type: " + this.paymentType);
-        }
-    }
-
-    public void updateBalanceFromStrategy(PaymentStrategy strategy) {
-        this.balance = BigDecimal.valueOf(strategy.getBalance());//had to do bigDecimal because I used float instead -nathan
     }
 }

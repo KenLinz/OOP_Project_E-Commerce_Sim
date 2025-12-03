@@ -2,10 +2,12 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>User Login</title>
-</head>
+    <link rel="stylesheet" th:href="@{/style.css}" href="../static/style.css"></head>
 <body>
 
-<h2>User Login</h2>
+<header>
+    <h1>Login</h1>
+</header>
 
 <div th:if="${loginError}" style="color: red; margin-bottom: 15px;">
     <p th:text="${loginError}"></p>

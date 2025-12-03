@@ -4,32 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Payment Method</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f9; }
-        .container { width: 80%; max-width: 600px; margin: 20px auto; padding: 20px; background: white; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); border-radius: 8px; }
-        h1 { color: #333; }
-        .back-link { display: inline-block; margin-bottom: 20px; text-decoration: none; color: #4CAF50; font-weight: bold; }
-        .error { color: red; padding: 10px; background-color: #ffe6e6; border: 1px solid red; border-radius: 4px; margin-bottom: 15px; }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
-        input[type="text"], input[type="number"], input[type="email"], input[type="password"], select {
-            width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;
-        }
-        .payment-type-fields { display: none; margin-top: 15px; padding: 15px; background-color: #f9f9f9; border-radius: 4px; }
-        .payment-type-fields.active { display: block; }
-        button[type="submit"] {
-            width: 100%; padding: 12px; background-color: #4CAF50; color: white; border: none;
-            border-radius: 4px; cursor: pointer; font-size: 16px; font-weight: bold;
-        }
-        button[type="submit"]:hover { background-color: #45a049; }
-        .required { color: red; }
-    </style>
+    <link rel="stylesheet" th:href="@{/style.css}" href="../static/style.css"></head>
 </head>
 <body>
 
+<header>
+    <h1>Add Payment Methods</h1>
+</header>
+
 <div class="container">
     <a th:href="@{/payment-methods}" class="back-link">← Back to Payment Methods</a>
-    <h1>Add New Payment Method</h1>
 
     <div th:if="${error}" class="error" th:text="${error}"></div>
 
