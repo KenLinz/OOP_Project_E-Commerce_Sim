@@ -137,6 +137,10 @@ public class HomeController {
     @PostMapping("/add-to-cart")
     public String addToCart(@RequestParam Long productId,
                             @RequestParam Integer quantity,
+                            @RequestParam(required = false, defaultValue = "false") Boolean hasWarranty,
+                            @RequestParam(required = false, defaultValue = "0") Integer warrantyYears,
+                            @RequestParam(required = false, defaultValue = "false") Boolean hasGiftWrap,
+                            @RequestParam(required = false, defaultValue = "0") BigDecimal discountPercentage,
                             HttpSession session,
                             RedirectAttributes redirectAttributes) {
         Optional<UserSQL> userOptional = getCurrentUser(session);
@@ -146,7 +150,7 @@ public class HomeController {
 
         try {
             UserSQL user = userOptional.get();
-            cartService.addProductToCart(user, productId, quantity);
+            cartService.addProductToCart(user, productId, quantity, hasWarranty, warrantyYears, hasGiftWrap, discountPercentage);
 
             Optional<ProductSQL> product = productService.getProductById(productId);
             String productName = product.map(ProductSQL::getName).orElse("item");
@@ -166,7 +170,23 @@ public class HomeController {
             return "redirect:/login";
         }
         CartSQL cart = cartService.getOrCreateCart(userOptional.get());
+
+        // Convert cart items to decorated products for price calculation
+        List<product.IProduct> decoratedProducts = cart.getItems().stream()
+                .map(product.ProductFactory::createFromCartItem)
+                .collect(java.util.stream.Collectors.toList());
+
+        // Calculate grand total
+        BigDecimal grandTotal = BigDecimal.ZERO;
+        for (int i = 0; i < decoratedProducts.size(); i++) {
+            BigDecimal lineTotal = decoratedProducts.get(i).getPrice()
+                    .multiply(BigDecimal.valueOf(cart.getItems().get(i).getQuantity()));
+            grandTotal = grandTotal.add(lineTotal);
+        }
+
         model.addAttribute("cart", cart);
+        model.addAttribute("decoratedProducts", decoratedProducts);
+        model.addAttribute("grandTotal", grandTotal);
         return "cart";
     }
 
@@ -245,7 +265,22 @@ public class HomeController {
             return "redirect:/cart";
         }
 
+        // Convert cart items to decorated products for price calculation
+        List<product.IProduct> decoratedProducts = cart.getItems().stream()
+                .map(product.ProductFactory::createFromCartItem)
+                .collect(java.util.stream.Collectors.toList());
+
+        // Calculate grand total
+        BigDecimal grandTotal = BigDecimal.ZERO;
+        for (int i = 0; i < decoratedProducts.size(); i++) {
+            BigDecimal lineTotal = decoratedProducts.get(i).getPrice()
+                    .multiply(BigDecimal.valueOf(cart.getItems().get(i).getQuantity()));
+            grandTotal = grandTotal.add(lineTotal);
+        }
+
         model.addAttribute("cart", cart);
+        model.addAttribute("decoratedProducts", decoratedProducts);
+        model.addAttribute("grandTotal", grandTotal);
         return "checkout-customize";
     }
 

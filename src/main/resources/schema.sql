@@ -29,9 +29,12 @@ CREATE TABLE cart_items (
     cart_id BIGINT NOT NULL,
     product_id BIGINT NOT NULL,
     quantity INTEGER NOT NULL CHECK (QUANTITY > 0),
+    has_warranty BOOLEAN DEFAULT FALSE,
+    warranty_years INTEGER DEFAULT 0,
+    has_gift_wrap BOOLEAN DEFAULT FALSE,
+    discount_percentage NUMERIC(5, 2) DEFAULT 0.00,
     FOREIGN KEY (cart_id) REFERENCES carts(id),
-    FOREIGN KEY (product_id) REFERENCES products(id),
-    UNIQUE (cart_id, product_id)
+    FOREIGN KEY (product_id) REFERENCES products(id)
 );
 
 CREATE TABLE payment_methods (

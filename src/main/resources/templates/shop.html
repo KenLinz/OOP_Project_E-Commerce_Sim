@@ -34,6 +34,31 @@
                 <label for="quantity">Qty:</label>
                 <input type="number" id="quantity" name="quantity" value="1" min="1" style="width: 50px; margin-right: 10px;">
 
+                <div class="decorator-options" style="margin: 10px 0; font-size: 0.9em;">
+                    <label style="display: block; margin: 5px 0;">
+                        <input type="checkbox" name="hasWarranty" value="true" onchange="toggleWarrantyYears(this)">
+                        Add Warranty (+$10/year)
+                    </label>
+                    <div class="warranty-years" style="margin-left: 20px; display: none;">
+                        <label for="warrantyYears">Years:</label>
+                        <input type="number" name="warrantyYears" value="1" min="1" max="5" style="width: 50px;">
+                    </div>
+
+                    <label style="display: block; margin: 5px 0;">
+                        <input type="checkbox" name="hasGiftWrap" value="true">
+                        Add Gift Wrap (+$5.00)
+                    </label>
+
+                    <label style="display: block; margin: 5px 0;">
+                        <input type="checkbox" name="hasDiscount" value="true" onchange="toggleDiscount(this)">
+                        Apply Discount
+                    </label>
+                    <div class="discount-input" style="margin-left: 20px; display: none;">
+                        <label for="discountPercentage">%:</label>
+                        <input type="number" name="discountPercentage" value="0" min="0" max="100" step="1" style="width: 50px;">
+                    </div>
+                </div>
+
                 <button type="submit">Add to Cart</button>
             </form>
         </div>
@@ -43,6 +68,31 @@
 
     </div>
 </div>
+
+<script>
+function toggleWarrantyYears(checkbox) {
+    const warrantyYearsDiv = checkbox.closest('.decorator-options').querySelector('.warranty-years');
+    const warrantyInput = warrantyYearsDiv.querySelector('input[name="warrantyYears"]');
+    if (checkbox.checked) {
+        warrantyYearsDiv.style.display = 'block';
+    } else {
+        warrantyYearsDiv.style.display = 'none';
+        warrantyInput.value = '0';
+    }
+}
+
+function toggleDiscount(checkbox) {
+    const discountDiv = checkbox.closest('.decorator-options').querySelector('.discount-input');
+    const discountInput = discountDiv.querySelector('input[name="discountPercentage"]');
+    if (checkbox.checked) {
+        discountDiv.style.display = 'block';
+        discountInput.value = '10';
+    } else {
+        discountDiv.style.display = 'none';
+        discountInput.value = '0';
+    }
+}
+</script>
 
 </body>
 </html>

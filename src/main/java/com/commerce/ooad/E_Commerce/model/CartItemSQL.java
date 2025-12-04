@@ -22,6 +22,18 @@ public class CartItemSQL {
     @JoinColumn(name = "product_id", nullable = false)
     private ProductSQL product;
 
+    @Column(name = "has_warranty")
+    private Boolean hasWarranty = false;
+
+    @Column(name = "warranty_years")
+    private Integer warrantyYears = 0;
+
+    @Column(name = "has_gift_wrap")
+    private Boolean hasGiftWrap = false;
+
+    @Column(name = "discount_percentage")
+    private BigDecimal discountPercentage = BigDecimal.ZERO;
+
     public CartItemSQL() {}
 
     public CartItemSQL(CartSQL cart, ProductSQL product, Integer quantity) {
@@ -79,5 +91,37 @@ public class CartItemSQL {
 
     public ProductSQL getProduct() {
         return product;
+    }
+
+    public Boolean getHasWarranty() {
+        return hasWarranty;
+    }
+
+    public void setHasWarranty(Boolean hasWarranty) {
+        this.hasWarranty = hasWarranty;
+    }
+
+    public Integer getWarrantyYears() {
+        return warrantyYears;
+    }
+
+    public void setWarrantyYears(Integer warrantyYears) {
+        this.warrantyYears = warrantyYears;
+    }
+
+    public Boolean getHasGiftWrap() {
+        return hasGiftWrap;
+    }
+
+    public void setHasGiftWrap(Boolean hasGiftWrap) {
+        this.hasGiftWrap = hasGiftWrap;
+    }
+
+    public BigDecimal getDiscountPercentage() {
+        return discountPercentage;
+    }
+
+    public void setDiscountPercentage(BigDecimal discountPercentage) {
+        this.discountPercentage = discountPercentage;
     }
 }
