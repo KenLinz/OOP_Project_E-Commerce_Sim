@@ -17,7 +17,6 @@ public class Product implements IProduct {
 
     @Override
     public BigDecimal getPrice() {
-        // Return unit price only - decorators will add to this, then multiply by quantity in view
         return cartItem.getProduct().getCost();
     }
 

@@ -37,7 +37,6 @@ public class CheckoutService {
 
         List<IProduct> orderItems = new ArrayList<>();
         cart.getItems().forEach(cartItem -> {
-            // Use ProductFactory to create decorated product from cart item (includes existing decorators)
             IProduct item = product.ProductFactory.createFromCartItem(cartItem);
 
             ItemCustomization customization = customizations.get(cartItem.getId());
@@ -45,7 +44,9 @@ public class CheckoutService {
                 item = applyCustomizations(item, customization);
             }
 
-            orderItems.add(item);
+            for (int i = 0; i < cartItem.getQuantity(); i++) {
+                orderItems.add(item);
+            }
         });
 
         CheckoutTemplate checkout = createCheckoutForState(user, orderItems);
@@ -58,7 +59,6 @@ public class CheckoutService {
 
         List<IProduct> orderItems = new ArrayList<>();
         cart.getItems().forEach(cartItem -> {
-            // Use ProductFactory to create decorated product from cart item (includes existing decorators)
             IProduct item = product.ProductFactory.createFromCartItem(cartItem);
 
             ItemCustomization customization = customizations.get(cartItem.getId());
@@ -66,7 +66,9 @@ public class CheckoutService {
                 item = applyCustomizations(item, customization);
             }
 
-            orderItems.add(item);
+            for (int i = 0; i < cartItem.getQuantity(); i++) {
+                orderItems.add(item);
+            }
         });
 
         CheckoutTemplate checkout = createCheckoutForState(user, orderItems);

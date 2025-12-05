@@ -31,13 +31,11 @@ public class CartSQL {
     public void addProduct(ProductSQL product, Integer quantity,
                           Boolean hasWarranty, Integer warrantyYears,
                           Boolean hasGiftWrap, BigDecimal discountPercentage) {
-        // Normalize null values to defaults for comparison
         Boolean normalizedWarranty = hasWarranty != null ? hasWarranty : false;
         Integer normalizedWarrantyYears = warrantyYears != null ? warrantyYears : 0;
         Boolean normalizedGiftWrap = hasGiftWrap != null ? hasGiftWrap : false;
         BigDecimal normalizedDiscount = discountPercentage != null ? discountPercentage : BigDecimal.ZERO;
 
-        // Find existing item with same product AND same decorator configuration
         Optional<CartItemSQL> existingItem = findItemByProductAndDecorators(
             product, normalizedWarranty, normalizedWarrantyYears, normalizedGiftWrap, normalizedDiscount
         );
@@ -54,28 +52,12 @@ public class CartSQL {
         }
     }
 
-    public void removeProduct(ProductSQL product) {
-        items.removeIf(item -> item.getProduct().getId().equals(product.getId()));
-    }
-
-    public BigDecimal calculateTotal() {
-        return items.stream()
-                .map(CartItemSQL::getSubtotal)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
-
     public boolean isEmpty() {
         return items.isEmpty();
     }
 
     public void clear() {
         items.clear();
-    }
-
-    private Optional<CartItemSQL> findItemByProduct(ProductSQL product) {
-        return items.stream()
-                .filter(item -> item.belongsToProduct(product))
-                .findFirst();
     }
 
     private Optional<CartItemSQL> findItemByProductAndDecorators(ProductSQL product,
@@ -89,7 +71,6 @@ public class CartSQL {
                         return false;
                     }
 
-                    // Normalize item's values for comparison
                     Boolean itemWarranty = item.getHasWarranty() != null ? item.getHasWarranty() : false;
                     Integer itemWarrantyYears = item.getWarrantyYears() != null ? item.getWarrantyYears() : 0;
                     Boolean itemGiftWrap = item.getHasGiftWrap() != null ? item.getHasGiftWrap() : false;
@@ -112,6 +93,6 @@ public class CartSQL {
     }
 
     public List<CartItemSQL> getItems() {
-        return new ArrayList<>(items);
+        return items;
     }
 }

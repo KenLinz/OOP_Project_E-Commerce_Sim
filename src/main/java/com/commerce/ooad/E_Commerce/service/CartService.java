@@ -44,13 +44,15 @@ public class CartService {
     }
 
     @Transactional
-    public void removeProductFromCart(UserSQL user, Long productId)
-            throws ProductNotFoundException {
+    public void removeItemFromCart(UserSQL user, Long itemId) throws ItemNotFoundException {
         CartSQL cart = getOrCreateCart(user);
-        ProductSQL product = productRepository.findById(productId)
-                .orElseThrow(() -> new ProductNotFoundException("Product does not exist"));
 
-        cart.removeProduct(product);
+        boolean removed = cart.getItems().removeIf(item -> item.getId().equals(itemId));
+
+        if (!removed) {
+            throw new ItemNotFoundException("Cart item not found");
+        }
+
         cartRepository.save(cart);
     }
 
@@ -63,6 +65,12 @@ public class CartService {
 
     public static class ProductNotFoundException extends Exception {
         public ProductNotFoundException(String message) {
+            super(message);
+        }
+    }
+
+    public static class ItemNotFoundException extends Exception {
+        public ItemNotFoundException(String message) {
             super(message);
         }
     }
