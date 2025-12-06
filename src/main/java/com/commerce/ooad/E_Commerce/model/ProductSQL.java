@@ -42,11 +42,4 @@ public class ProductSQL {
     public BigDecimal getCost() {
         return cost;
     }
-
-    public void updatePrice(BigDecimal newCost) {
-        if (newCost.compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException("Cost cannot be negative");
-        }
-        this.cost = newCost;
-    }
 }

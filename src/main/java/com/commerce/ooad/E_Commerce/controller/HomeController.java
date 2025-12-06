@@ -1,5 +1,6 @@
 package com.commerce.ooad.E_Commerce.controller;
 
+import jdk.jfr.Event;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +16,9 @@ import java.util.Map;
 import java.util.Optional;
 
 import checkout.CheckoutResult;
+
+import observer.EventType;
+import observer.EventBus;
 
 import com.commerce.ooad.E_Commerce.model.UserSQL;
 import com.commerce.ooad.E_Commerce.model.ProductSQL;
@@ -46,23 +50,6 @@ public class HomeController {
     @GetMapping("/")
     public String index() {
         return "redirect:/login";
-    }
-
-    @GetMapping("/hello")
-    @ResponseBody
-    public String hello(@RequestParam(value = "name", defaultValue = "World") String name) {
-        return String.format("Hello %s!", name);
-    }
-
-    @GetMapping("/1")
-    @ResponseBody
-    public String page1() {
-        return "This is Page 1";
-    }
-
-    @GetMapping("/2")
-    public String page2() {
-        return "page2";
     }
 
     @GetMapping("/register")
@@ -137,6 +124,10 @@ public class HomeController {
     @PostMapping("/add-to-cart")
     public String addToCart(@RequestParam Long productId,
                             @RequestParam Integer quantity,
+                            @RequestParam(required = false, defaultValue = "false") Boolean hasWarranty,
+                            @RequestParam(required = false, defaultValue = "0") Integer warrantyYears,
+                            @RequestParam(required = false, defaultValue = "false") Boolean hasGiftWrap,
+                            @RequestParam(required = false, defaultValue = "0") BigDecimal discountPercentage,
                             HttpSession session,
                             RedirectAttributes redirectAttributes) {
         Optional<UserSQL> userOptional = getCurrentUser(session);
@@ -146,7 +137,7 @@ public class HomeController {
 
         try {
             UserSQL user = userOptional.get();
-            cartService.addProductToCart(user, productId, quantity);
+            cartService.addProductToCart(user, productId, quantity, hasWarranty, warrantyYears, hasGiftWrap, discountPercentage);
 
             Optional<ProductSQL> product = productService.getProductById(productId);
             String productName = product.map(ProductSQL::getName).orElse("item");
@@ -166,8 +157,39 @@ public class HomeController {
             return "redirect:/login";
         }
         CartSQL cart = cartService.getOrCreateCart(userOptional.get());
+
+        List<product.IProduct> decoratedProducts = cart.getItems().stream()
+                .map(product.ProductFactory::createFromCartItem)
+                .collect(java.util.stream.Collectors.toList());
+
+        BigDecimal grandTotal = BigDecimal.ZERO;
+        for (int i = 0; i < decoratedProducts.size(); i++) {
+            BigDecimal lineTotal = decoratedProducts.get(i).getPrice()
+                    .multiply(BigDecimal.valueOf(cart.getItems().get(i).getQuantity()));
+            grandTotal = grandTotal.add(lineTotal);
+        }
+
         model.addAttribute("cart", cart);
+        model.addAttribute("decoratedProducts", decoratedProducts);
+        model.addAttribute("grandTotal", grandTotal);
         return "cart";
+    }
+
+    @PostMapping("/cart/remove")
+    public String removeFromCart(@RequestParam Long itemId, HttpSession session, RedirectAttributes redirectAttributes) {
+        Optional<UserSQL> userOptional = getCurrentUser(session);
+        if (userOptional.isEmpty()) {
+            return "redirect:/login";
+        }
+
+        try {
+            cartService.removeItemFromCart(userOptional.get(), itemId);
+            redirectAttributes.addFlashAttribute("message", "Item removed from cart.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Failed to remove item from cart.");
+        }
+
+        return "redirect:/cart";
     }
 
     @GetMapping("/payment-methods")
@@ -245,25 +267,14 @@ public class HomeController {
             return "redirect:/cart";
         }
 
-        model.addAttribute("cart", cart);
-        return "checkout-customize";
-    }
+        Map<Long, CheckoutService.ItemCustomization> customizations = new java.util.HashMap<>();
 
-    @PostMapping("/checkout/preview")
-    public String previewCheckout(@RequestParam Map<String, String> params, HttpSession session, Model model) {
-        Optional<UserSQL> userOptional = getCurrentUser(session);
-        if (userOptional.isEmpty()) {
-            return "redirect:/login";
-        }
-
-        Map<Long, CheckoutService.ItemCustomization> customizations = parseCustomizations(params);
+        CheckoutResult result = checkoutService.previewCheckout(userOptional.get(), customizations);
+        List<PaymentMethodSQL> paymentMethods = paymentMethodService.getUserPaymentMethods(userOptional.get());
 
         session.setAttribute("customizations", customizations);
 
-        CheckoutResult result = checkoutService.previewCheckout(userOptional.get(), customizations);
-
-        List<PaymentMethodSQL> paymentMethods = paymentMethodService.getUserPaymentMethods(userOptional.get());
-
+        model.addAttribute("cart", cart);
         model.addAttribute("checkoutResult", result);
         model.addAttribute("paymentMethods", paymentMethods);
 
@@ -289,8 +300,15 @@ public class HomeController {
             CheckoutResult result = checkoutService.prepareCheckout(userOptional.get(), customizations);
             checkoutService.completeCheckout(userOptional.get(), paymentMethodId, result);
 
+
             session.removeAttribute("customizations");
             redirectAttributes.addFlashAttribute("orderTotal", result.getTotal());
+
+            String productNames = result.getOrderItems().stream()
+                    .map(product.IProduct::getDescription)
+                    .collect(java.util.stream.Collectors.joining(", "));
+
+            notifyObservers(EventType.SuccessfulTransaction, "Email: " + userOptional.get().getEmail() + "|" + "Total: " + result.getTotal() + "|" + "Items: " + result.getOrderItems().size() + "|" + "Products: " + productNames);
             return "redirect:/order-success";
 
         } catch (CheckoutService.CheckoutException e) {
@@ -312,24 +330,7 @@ public class HomeController {
         return "order-success";
     }
 
-    private Map<Long, CheckoutService.ItemCustomization> parseCustomizations(Map<String, String> params) {
-        Map<Long, CheckoutService.ItemCustomization> customizations = new java.util.HashMap<>();
-
-        params.forEach((key, value) -> {
-            if (key.startsWith("giftWrap_")) {
-                Long itemId = Long.parseLong(key.substring(9));
-                customizations.computeIfAbsent(itemId, k -> new CheckoutService.ItemCustomization()).setGiftWrap(true);
-            } else if (key.startsWith("warranty_")) {
-                Long itemId = Long.parseLong(key.substring(9));
-                int years = Integer.parseInt(value);
-                customizations.computeIfAbsent(itemId, k -> new CheckoutService.ItemCustomization()).setWarrantyYears(years);
-            } else if (key.startsWith("discount_")) {
-                Long itemId = Long.parseLong(key.substring(9));
-                BigDecimal percentage = new BigDecimal(value);
-                customizations.computeIfAbsent(itemId, k -> new CheckoutService.ItemCustomization()).setDiscountPercentage(percentage);
-            }
-        });
-
-        return customizations;
+    private void notifyObservers(EventType eventType, String message) {
+        EventBus.INSTANCE.broadcast(eventType, message);
     }
 }

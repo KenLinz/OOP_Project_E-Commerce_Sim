@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Confirm Your Order</title>
-    <link rel="stylesheet" th:href="@{/style.css}" href="../static/style.css"></head>
+    <link rel="stylesheet" th:href="@{/style.css}" href="../static/style.css">
 </head>
 <body>
 
@@ -13,19 +13,23 @@
 </header>
 
 <div class="container">
-    <a th:href="@{/checkout}" class="back-link">← Back to Customize</a>
+    <a th:href="@{/cart}" class="back-link">← Back to Cart</a>
 
     <div class="content">
         <div th:if="${error}" class="error" th:text="${error}"></div>
 
         <div class="section">
             <div class="section-title">Order Items</div>
-            <div th:each="item : ${checkoutResult.orderItems}" class="order-item">
+            <div th:each="cartItem : ${cart.items}" class="order-item">
                 <div class="item-description">
-                    <span class="item-name" th:text="${item.description}">Product Name</span>
+                    <span th:with="decoratedProduct=${T(product.ProductFactory).createFromCartItem(cartItem)}"
+                          class="item-name"
+                          th:text="${decoratedProduct.description}">Product Name</span>
                 </div>
                 <div class="item-price">
-                    $<span th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 2, 'POINT')}">0.00</span>
+                    <span th:with="decoratedProduct=${T(product.ProductFactory).createFromCartItem(cartItem)}, lineTotal=${decoratedProduct.price * cartItem.quantity}">
+                        $<span th:text="${#numbers.formatDecimal(lineTotal, 0, 'COMMA', 2, 'POINT')}">0.00</span>
+                    </span>
                 </div>
             </div>
         </div>
@@ -73,7 +77,7 @@
 
                                 <span class="payment-icon" th:if="${method.paymentType == 'Paypal'}">Paypal</span>
                                 <span class="payment-icon" th:if="${method.paymentType == 'Visa'}">Visa</span>
-                                <span class="payment-icon" th:if="${method.paymentType == 'MasterCard'}"></span>
+                                <span class="payment-icon" th:if="${method.paymentType == 'MasterCard'}">MasterCard</span>
 
                                 <div class="payment-info">
                                     <span class="payment-type" th:text="${method.paymentType}">Payment Type</span>
@@ -91,7 +95,7 @@
                     </div>
 
                     <div class="actions">
-                        <a th:href="@{/checkout}" class="btn btn-secondary">← Back</a>
+                        <a th:href="@{/cart}" class="btn btn-secondary">← Back</a>
                         <button type="submit" class="btn btn-primary">Complete Purchase</button>
                     </div>
                 </form>

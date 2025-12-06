@@ -1,7 +1,6 @@
 package com.commerce.ooad.E_Commerce.service;
 
 import product.IProduct;
-import product.Product;
 import checkout.CheckoutTemplate;
 import checkout.CaliforniaTaxCheckout;
 import checkout.ColoradoTaxCheckout;
@@ -38,14 +37,16 @@ public class CheckoutService {
 
         List<IProduct> orderItems = new ArrayList<>();
         cart.getItems().forEach(cartItem -> {
-            IProduct item = new Product(cartItem);
+            IProduct item = product.ProductFactory.createFromCartItem(cartItem);
 
             ItemCustomization customization = customizations.get(cartItem.getId());
             if (customization != null) {
                 item = applyCustomizations(item, customization);
             }
 
-            orderItems.add(item);
+            for (int i = 0; i < cartItem.getQuantity(); i++) {
+                orderItems.add(item);
+            }
         });
 
         CheckoutTemplate checkout = createCheckoutForState(user, orderItems);
@@ -58,14 +59,16 @@ public class CheckoutService {
 
         List<IProduct> orderItems = new ArrayList<>();
         cart.getItems().forEach(cartItem -> {
-            IProduct item = new Product(cartItem);
+            IProduct item = product.ProductFactory.createFromCartItem(cartItem);
 
             ItemCustomization customization = customizations.get(cartItem.getId());
             if (customization != null) {
                 item = applyCustomizations(item, customization);
             }
 
-            orderItems.add(item);
+            for (int i = 0; i < cartItem.getQuantity(); i++) {
+                orderItems.add(item);
+            }
         });
 
         CheckoutTemplate checkout = createCheckoutForState(user, orderItems);

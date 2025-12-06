@@ -28,24 +28,28 @@ public class CartSQL {
         this.items = new ArrayList<>();
     }
 
-    public void addProduct(ProductSQL product, Integer quantity) {
-        Optional<CartItemSQL> existingItem = findItemByProduct(product);
+    public void addProduct(ProductSQL product, Integer quantity,
+                          Boolean hasWarranty, Integer warrantyYears,
+                          Boolean hasGiftWrap, BigDecimal discountPercentage) {
+        Boolean normalizedWarranty = hasWarranty != null ? hasWarranty : false;
+        Integer normalizedWarrantyYears = warrantyYears != null ? warrantyYears : 0;
+        Boolean normalizedGiftWrap = hasGiftWrap != null ? hasGiftWrap : false;
+        BigDecimal normalizedDiscount = discountPercentage != null ? discountPercentage : BigDecimal.ZERO;
+
+        Optional<CartItemSQL> existingItem = findItemByProductAndDecorators(
+            product, normalizedWarranty, normalizedWarrantyYears, normalizedGiftWrap, normalizedDiscount
+        );
+
         if (existingItem.isPresent()) {
             existingItem.get().increaseQuantity(quantity);
         } else {
             CartItemSQL newItem = new CartItemSQL(this, product, quantity);
+            newItem.setHasWarranty(normalizedWarranty);
+            newItem.setWarrantyYears(normalizedWarrantyYears);
+            newItem.setHasGiftWrap(normalizedGiftWrap);
+            newItem.setDiscountPercentage(normalizedDiscount);
             items.add(newItem);
         }
-    }
-
-    public void removeProduct(ProductSQL product) {
-        items.removeIf(item -> item.getProduct().getId().equals(product.getId()));
-    }
-
-    public BigDecimal calculateTotal() {
-        return items.stream()
-                .map(CartItemSQL::getSubtotal)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     public boolean isEmpty() {
@@ -56,9 +60,27 @@ public class CartSQL {
         items.clear();
     }
 
-    private Optional<CartItemSQL> findItemByProduct(ProductSQL product) {
+    private Optional<CartItemSQL> findItemByProductAndDecorators(ProductSQL product,
+                                                                 Boolean hasWarranty,
+                                                                 Integer warrantyYears,
+                                                                 Boolean hasGiftWrap,
+                                                                 BigDecimal discountPercentage) {
         return items.stream()
-                .filter(item -> item.belongsToProduct(product))
+                .filter(item -> {
+                    if (!item.belongsToProduct(product)) {
+                        return false;
+                    }
+
+                    Boolean itemWarranty = item.getHasWarranty() != null ? item.getHasWarranty() : false;
+                    Integer itemWarrantyYears = item.getWarrantyYears() != null ? item.getWarrantyYears() : 0;
+                    Boolean itemGiftWrap = item.getHasGiftWrap() != null ? item.getHasGiftWrap() : false;
+                    BigDecimal itemDiscount = item.getDiscountPercentage() != null ? item.getDiscountPercentage() : BigDecimal.ZERO;
+
+                    return itemWarranty.equals(hasWarranty) &&
+                           itemWarrantyYears.equals(warrantyYears) &&
+                           itemGiftWrap.equals(hasGiftWrap) &&
+                           itemDiscount.compareTo(discountPercentage) == 0;
+                })
                 .findFirst();
     }
 
@@ -71,6 +93,6 @@ public class CartSQL {
     }
 
     public List<CartItemSQL> getItems() {
-        return new ArrayList<>(items);
+        return items;
     }
 }

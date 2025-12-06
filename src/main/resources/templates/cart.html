@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Your Shopping Cart</title>
-    <link rel="stylesheet" th:href="@{/style.css}" href="../static/style.css"></head>
+    <link rel="stylesheet" th:href="@{/style.css}" href="../static/style.css">
 </head>
 <body>
 
@@ -15,6 +15,9 @@
 <div class="container">
     <a th:href="@{/dashboard}" class="back-link">← Back to Dashboard</a>
 
+    <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
     <div th:if="${cart != null and not #lists.isEmpty(cart.items)}">
         <table>
             <thead>
@@ -23,29 +26,34 @@
                 <th>Unit Cost</th>
                 <th>Quantity</th>
                 <th>Line Total</th>
+                <th>Action</th>
             </tr>
             </thead>
             <tbody>
-            <tr th:each="cartItem : ${cart.items}">
+            <tr th:each="decoratedProduct, iterStat : ${decoratedProducts}">
 
-                <td th:text="${cartItem.product.name}">Product Name</td>
+                <td th:text="${decoratedProduct.description}">Product Name</td>
 
-                <td th:text="'$' + ${#numbers.formatDecimal(cartItem.product.cost, 0, 'COMMA', 2, 'POINT')}">$0.00</td>
+                <td th:text="'$' + ${#numbers.formatDecimal(decoratedProduct.price, 0, 'COMMA', 2, 'POINT')}">$0.00</td>
 
-                <td th:text="${cartItem.quantity}">1</td>
+                <td th:text="${cart.items[iterStat.index].quantity}">1</td>
 
-                <td th:with="lineTotal=${cartItem.product.cost * cartItem.quantity}"
+                <td th:with="lineTotal=${decoratedProduct.price * cart.items[iterStat.index].quantity}"
                     th:text="'$' + ${#numbers.formatDecimal(lineTotal, 0, 'COMMA', 2, 'POINT')}">
                     $0.00
+                </td>
+
+                <td>
+                    <form th:action="@{/cart/remove}" method="post" style="display: inline;">
+                        <input type="hidden" name="itemId" th:value="${cart.items[iterStat.index].id}" />
+                        <button type="submit" class="btn-remove" onclick="return confirm('Are you sure you want to remove this item?');">Remove</button>
+                    </form>
                 </td>
             </tr>
             </tbody>
             <tr class="total-row">
-                <td colspan="3" style="text-align: right;">Grand Total:</td>
-
-                <td th:text="'$' + ${#numbers.formatDecimal(#aggregates.sum(cart.items.![product.cost * quantity]), 0, 'COMMA', 2, 'POINT')}">
-                    $0.00
-                </td>
+                <td colspan="4" style="text-align: right;">Grand Total:</td>
+                <td th:text="'$' + ${#numbers.formatDecimal(grandTotal, 0, 'COMMA', 2, 'POINT')}">$0.00</td>
             </tr>
         </table>
 

@@ -17,7 +17,7 @@ public class Product implements IProduct {
 
     @Override
     public BigDecimal getPrice() {
-        return cartItem.getSubtotal();
+        return cartItem.getProduct().getCost();
     }
 
     public CartItemSQL getCartItem() {
