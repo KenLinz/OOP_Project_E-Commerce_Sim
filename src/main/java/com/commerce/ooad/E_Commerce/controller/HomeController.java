@@ -158,9 +158,7 @@ public class HomeController {
         }
         CartSQL cart = cartService.getOrCreateCart(userOptional.get());
 
-        List<product.IProduct> decoratedProducts = cart.getItems().stream()
-                .map(product.ProductFactory::createFromCartItem)
-                .collect(java.util.stream.Collectors.toList());
+        List<product.IProduct> decoratedProducts = productService.createDecoratedProductsFromCart(cart);
 
         BigDecimal grandTotal = BigDecimal.ZERO;
         for (int i = 0; i < decoratedProducts.size(); i++) {

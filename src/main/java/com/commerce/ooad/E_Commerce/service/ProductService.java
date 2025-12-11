@@ -1,5 +1,6 @@
 package com.commerce.ooad.E_Commerce.service;
 
+import com.commerce.ooad.E_Commerce.model.CartSQL;
 import com.commerce.ooad.E_Commerce.model.ProductSQL;
 import com.commerce.ooad.E_Commerce.repository.ProductRepository;
 import org.springframework.stereotype.Service;
@@ -27,5 +28,11 @@ public class ProductService {
         return productRepository.findAll().stream()
                 .filter(ProductSQL::isAvailable)
                 .toList();
+    }
+
+    public List<product.IProduct> createDecoratedProductsFromCart(CartSQL cart) {
+        return cart.getItems().stream()
+                .map(product.ProductFactory::createFromCartItem)
+                .collect(java.util.stream.Collectors.toList());
     }
 }

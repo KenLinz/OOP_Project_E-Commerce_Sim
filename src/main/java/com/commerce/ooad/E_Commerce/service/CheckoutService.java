@@ -1,10 +1,7 @@
 package com.commerce.ooad.E_Commerce.service;
 
+import checkout.*;
 import product.IProduct;
-import checkout.CheckoutTemplate;
-import checkout.CaliforniaTaxCheckout;
-import checkout.ColoradoTaxCheckout;
-import checkout.CheckoutResult;
 import product.GiftWrapDecorator;
 import product.DiscountDecorator;
 import product.WarrantyDecorator;
@@ -44,7 +41,7 @@ public class CheckoutService {
             }
         });
 
-        CheckoutTemplate checkout = createCheckoutForState(user, orderItems);
+        CheckoutTemplate checkout = CheckoutFactory.createCheckout(user, orderItems);
         return checkout.processCheckout();
     }
 
@@ -60,7 +57,7 @@ public class CheckoutService {
             }
         });
 
-        CheckoutTemplate checkout = createCheckoutForState(user, orderItems);
+        CheckoutTemplate checkout = CheckoutFactory.createCheckout(user, orderItems);
         return checkout.previewCheckout();
     }
 
@@ -91,20 +88,6 @@ public class CheckoutService {
         paymentMethodRepository.save(paymentMethod);
 
         cartService.clearCart(user);
-    }
-
-
-    private CheckoutTemplate createCheckoutForState(UserSQL user, List<IProduct> orderItems) {
-        String state = user.getState();
-
-        switch (state.toLowerCase()) {
-            case "co":
-                return new ColoradoTaxCheckout(user, orderItems);
-            case "ca":
-                return new CaliforniaTaxCheckout(user, orderItems);
-            default:
-                return new ColoradoTaxCheckout(user, orderItems);
-        }
     }
 
     public static class CheckoutException extends Exception {
