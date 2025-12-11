@@ -7,7 +7,7 @@ import java.math.RoundingMode;
 import java.util.List;
 
 public class CaliforniaTaxCheckout extends CheckoutTemplate {
-    private static final BigDecimal CALIFORNIA_TAX_RATE = new BigDecimal("7.25");
+    private static final BigDecimal CA_TAX_RATE = new BigDecimal("7.25");
 
     public CaliforniaTaxCheckout(UserSQL user, List<IProduct> orderItems) {
         super(user, orderItems);
@@ -15,7 +15,7 @@ public class CaliforniaTaxCheckout extends CheckoutTemplate {
 
     @Override
     protected BigDecimal calculateTaxRate() {
-        return CALIFORNIA_TAX_RATE;
+        return CA_TAX_RATE;
     }
 
     @Override
