@@ -73,11 +73,9 @@
         const paypalFields = document.getElementById('paypalFields');
         const cardFields = document.getElementById('cardFields');
 
-        // Hide all fields first
         paypalFields.classList.remove('active');
         cardFields.classList.remove('active');
 
-        // Show relevant fields based on payment type
         if (paymentType === 'Paypal') {
             paypalFields.classList.add('active');
         } else if (paymentType === 'Visa' || paymentType === 'MasterCard') {
