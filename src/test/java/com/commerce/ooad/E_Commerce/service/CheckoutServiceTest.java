@@ -10,8 +10,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -63,7 +61,7 @@ public class CheckoutServiceTest {
     public void testPrepareCheckout() {
         when(cartService.getOrCreateCart(testUser)).thenReturn(testCart);
 
-        CheckoutResult result = checkoutService.prepareCheckout(testUser, new HashMap<>());
+        CheckoutResult result = checkoutService.prepareCheckout(testUser);
 
         assertNotNull(result);
         assertEquals(new BigDecimal("200.00"), result.getSubtotal());
@@ -73,7 +71,7 @@ public class CheckoutServiceTest {
     public void testPreviewCheckout() {
         when(cartService.getOrCreateCart(testUser)).thenReturn(testCart);
 
-        CheckoutResult result = checkoutService.previewCheckout(testUser, new HashMap<>());
+        CheckoutResult result = checkoutService.previewCheckout(testUser);
 
         assertNotNull(result);
         assertTrue(result.getTotal().compareTo(BigDecimal.ZERO) > 0);
@@ -85,7 +83,7 @@ public class CheckoutServiceTest {
         when(paymentMethodRepository.save(testPaymentMethod)).thenReturn(testPaymentMethod);
         when(cartService.getOrCreateCart(testUser)).thenReturn(testCart);
 
-        CheckoutResult checkoutResult = checkoutService.prepareCheckout(testUser, new HashMap<>());
+        CheckoutResult checkoutResult = checkoutService.prepareCheckout(testUser);
 
         checkoutService.completeCheckout(testUser, 1L, checkoutResult);
 
@@ -98,7 +96,7 @@ public class CheckoutServiceTest {
         when(paymentMethodRepository.findById(999L)).thenReturn(Optional.empty());
         when(cartService.getOrCreateCart(testUser)).thenReturn(testCart);
 
-        CheckoutResult checkoutResult = checkoutService.prepareCheckout(testUser, new HashMap<>());
+        CheckoutResult checkoutResult = checkoutService.prepareCheckout(testUser);
 
         assertThrows(CheckoutService.CheckoutException.class, () -> {
             checkoutService.completeCheckout(testUser, 999L, checkoutResult);
@@ -113,7 +111,7 @@ public class CheckoutServiceTest {
         when(paymentMethodRepository.findById(1L)).thenReturn(Optional.of(testPaymentMethod));
         when(cartService.getOrCreateCart(testUser)).thenReturn(testCart);
 
-        CheckoutResult checkoutResult = checkoutService.prepareCheckout(testUser, new HashMap<>());
+        CheckoutResult checkoutResult = checkoutService.prepareCheckout(testUser);
 
         assertThrows(CheckoutService.CheckoutException.class, () -> {
             checkoutService.completeCheckout(otherUser, 1L, checkoutResult);
@@ -129,7 +127,7 @@ public class CheckoutServiceTest {
         when(paymentMethodRepository.findById(1L)).thenReturn(Optional.of(poorPayment));
         when(cartService.getOrCreateCart(testUser)).thenReturn(testCart);
 
-        CheckoutResult checkoutResult = checkoutService.prepareCheckout(testUser, new HashMap<>());
+        CheckoutResult checkoutResult = checkoutService.prepareCheckout(testUser);
 
         assertThrows(CheckoutService.CheckoutException.class, () -> {
             checkoutService.completeCheckout(testUser, 1L, checkoutResult);
@@ -137,27 +135,14 @@ public class CheckoutServiceTest {
     }
 
     @Test
-    public void testPrepareCheckoutWithCustomizations() {
-        when(cartService.getOrCreateCart(testUser)).thenReturn(testCart);
+    public void testPrepareCheckoutWithDecorators() {
+        CartSQL decoratedCart = new CartSQL(testUser);
+        ProductSQL product = new ProductSQL("Laptop", new BigDecimal("100.00"));
+        decoratedCart.addProduct(product, 2, true, 2, true, new BigDecimal("10.00"));
 
-        Map<Long, CheckoutService.ItemCustomization> customizations = new HashMap<>();
-        CheckoutService.ItemCustomization custom = new CheckoutService.ItemCustomization();
-        custom.setGiftWrap(true);
-        custom.setWarrantyYears(2);
+        when(cartService.getOrCreateCart(testUser)).thenReturn(decoratedCart);
 
-        if (!testCart.getItems().isEmpty()) {
-            try {
-                var field = CartItemSQL.class.getDeclaredField("id");
-                field.setAccessible(true);
-                field.set(testCart.getItems().get(0), 1L);
-            } catch (Exception e) {
-
-            }
-        }
-
-        customizations.put(1L, custom);
-
-        CheckoutResult result = checkoutService.prepareCheckout(testUser, customizations);
+        CheckoutResult result = checkoutService.prepareCheckout(testUser);
 
         assertNotNull(result);
     }
@@ -167,7 +152,7 @@ public class CheckoutServiceTest {
         testUser.setState("CA");
         when(cartService.getOrCreateCart(testUser)).thenReturn(testCart);
 
-        CheckoutResult result = checkoutService.prepareCheckout(testUser, new HashMap<>());
+        CheckoutResult result = checkoutService.prepareCheckout(testUser);
 
         assertEquals("California", result.getState());
     }
@@ -176,7 +161,7 @@ public class CheckoutServiceTest {
     public void testColoradoCheckout() {
         when(cartService.getOrCreateCart(testUser)).thenReturn(testCart);
 
-        CheckoutResult result = checkoutService.prepareCheckout(testUser, new HashMap<>());
+        CheckoutResult result = checkoutService.prepareCheckout(testUser);
 
         assertEquals("Colorado", result.getState());
     }

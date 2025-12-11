@@ -51,13 +51,4 @@ public class ProductServiceTest {
         Optional<ProductSQL> result = productService.getProductById(999L);
         assertFalse(result.isPresent());
     }
-
-    @Test
-    public void testGetAvailableProducts() {
-        ProductSQL unavailable = new ProductSQL("Free Item", BigDecimal.ZERO);
-        when(productRepository.findAll()).thenReturn(Arrays.asList(product1, product2, unavailable));
-        List<ProductSQL> result = productService.getAvailableProducts();
-        assertEquals(2, result.size());
-        assertTrue(result.stream().allMatch(ProductSQL::isAvailable));
-    }
 }

@@ -32,17 +32,12 @@ public class CheckoutService {
         this.paymentMethodRepository = paymentMethodRepository;
     }
 
-    public CheckoutResult prepareCheckout(UserSQL user, Map<Long, ItemCustomization> customizations) {
+    public CheckoutResult prepareCheckout(UserSQL user) {
         CartSQL cart = cartService.getOrCreateCart(user);
 
         List<IProduct> orderItems = new ArrayList<>();
         cart.getItems().forEach(cartItem -> {
             IProduct item = product.ProductFactory.createFromCartItem(cartItem);
-
-            ItemCustomization customization = customizations.get(cartItem.getId());
-            if (customization != null) {
-                item = applyCustomizations(item, customization);
-            }
 
             for (int i = 0; i < cartItem.getQuantity(); i++) {
                 orderItems.add(item);
@@ -50,21 +45,15 @@ public class CheckoutService {
         });
 
         CheckoutTemplate checkout = createCheckoutForState(user, orderItems);
-
         return checkout.processCheckout();
     }
 
-    public CheckoutResult previewCheckout(UserSQL user, Map<Long, ItemCustomization> customizations) {
+    public CheckoutResult previewCheckout(UserSQL user) {
         CartSQL cart = cartService.getOrCreateCart(user);
 
         List<IProduct> orderItems = new ArrayList<>();
         cart.getItems().forEach(cartItem -> {
             IProduct item = product.ProductFactory.createFromCartItem(cartItem);
-
-            ItemCustomization customization = customizations.get(cartItem.getId());
-            if (customization != null) {
-                item = applyCustomizations(item, customization);
-            }
 
             for (int i = 0; i < cartItem.getQuantity(); i++) {
                 orderItems.add(item);
@@ -72,7 +61,6 @@ public class CheckoutService {
         });
 
         CheckoutTemplate checkout = createCheckoutForState(user, orderItems);
-
         return checkout.previewCheckout();
     }
 
@@ -105,24 +93,6 @@ public class CheckoutService {
         cartService.clearCart(user);
     }
 
-    private IProduct applyCustomizations(IProduct item, ItemCustomization customization) {
-        IProduct decoratedItem = item;
-
-        if (customization.hasGiftWrap()) {
-            decoratedItem = new GiftWrapDecorator(decoratedItem);
-        }
-
-        if (customization.hasWarranty()) {
-            decoratedItem = new WarrantyDecorator(decoratedItem, customization.getWarrantyYears());
-        }
-
-        if (customization.hasDiscount()) {
-            decoratedItem = new DiscountDecorator(decoratedItem, customization.getDiscountPercentage());
-        }
-
-        return decoratedItem;
-    }
-
 
     private CheckoutTemplate createCheckoutForState(UserSQL user, List<IProduct> orderItems) {
         String state = user.getState();
@@ -140,37 +110,6 @@ public class CheckoutService {
     public static class CheckoutException extends Exception {
         public CheckoutException(String message) {
             super(message);
-        }
-    }
-
-    public static class ItemCustomization {
-        private boolean giftWrap;
-        private boolean warranty;
-        private int warrantyYears;
-        private boolean discount;
-        private BigDecimal discountPercentage;
-
-        public ItemCustomization() {}
-
-        public boolean hasGiftWrap() { return giftWrap; }
-        public void setGiftWrap(boolean giftWrap) { this.giftWrap = giftWrap; }
-
-        public boolean hasWarranty() { return warranty; }
-        public void setWarranty(boolean warranty) { this.warranty = warranty; }
-
-        public int getWarrantyYears() { return warrantyYears; }
-        public void setWarrantyYears(int warrantyYears) {
-            this.warranty = warrantyYears > 0;
-            this.warrantyYears = warrantyYears;
-        }
-
-        public boolean hasDiscount() { return discount; }
-        public void setDiscount(boolean discount) { this.discount = discount; }
-
-        public BigDecimal getDiscountPercentage() { return discountPercentage; }
-        public void setDiscountPercentage(BigDecimal discountPercentage) {
-            this.discount = discountPercentage != null && discountPercentage.compareTo(BigDecimal.ZERO) > 0;
-            this.discountPercentage = discountPercentage;
         }
     }
 }

@@ -267,12 +267,8 @@ public class HomeController {
             return "redirect:/cart";
         }
 
-        Map<Long, CheckoutService.ItemCustomization> customizations = new java.util.HashMap<>();
-
-        CheckoutResult result = checkoutService.previewCheckout(userOptional.get(), customizations);
+        CheckoutResult result = checkoutService.previewCheckout(userOptional.get());
         List<PaymentMethodSQL> paymentMethods = paymentMethodService.getUserPaymentMethods(userOptional.get());
-
-        session.setAttribute("customizations", customizations);
 
         model.addAttribute("cart", cart);
         model.addAttribute("checkoutResult", result);
@@ -290,18 +286,9 @@ public class HomeController {
         }
 
         try {
-            @SuppressWarnings("unchecked")
-            Map<Long, CheckoutService.ItemCustomization> customizations = (Map<Long, CheckoutService.ItemCustomization>) session.getAttribute("customizations");
-
-            if (customizations == null) {
-                customizations = new java.util.HashMap<>();
-            }
-
-            CheckoutResult result = checkoutService.prepareCheckout(userOptional.get(), customizations);
+            CheckoutResult result = checkoutService.prepareCheckout(userOptional.get());
             checkoutService.completeCheckout(userOptional.get(), paymentMethodId, result);
 
-
-            session.removeAttribute("customizations");
             redirectAttributes.addFlashAttribute("orderTotal", result.getTotal());
 
             String productNames = result.getOrderItems().stream()

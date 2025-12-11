@@ -83,7 +83,8 @@
                                     <span class="payment-type" th:text="${method.paymentType}">Payment Type</span>
                                     <span class="payment-account" th:if="${method.paymentEmail != null}"
                                           th:text="${method.paymentEmail}"></span>
-                                    <span class="payment-account" th:if="${method.paymentCardNumber != null}"
+                                    <span class="payment-account"
+                                          th:if="${method.paymentCardNumber != null and method.paymentCardNumber.length() >= 4}"
                                           th:text="${method.paymentCardName} + ' ending in ' + ${#strings.substring(method.paymentCardNumber, method.paymentCardNumber.length() - 4)}"></span>
                                 </div>
 
